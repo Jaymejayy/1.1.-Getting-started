@@ -1,20 +1,21 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hashgenerator-dep
+  name: log-output-dep
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hashgenerator
+      app: log-output
   template:
     metadata:
       labels:
-        app: hashgenerator
+        app: log-output
     spec:
       containers:
-        - name: hashgenerator
-          image: hashgenerator:1.0
+        - name: log-output
+          image: log-output:1.0
           imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
 
