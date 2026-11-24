@@ -1,70 +1,103 @@
+# 1.10 – Even More Services
 
-# 1.1 Getting Started - Hash Generator
+## Overview
 
-A simple Python application that generates a random UUID on startup and prints it every 5 seconds with a UTC timestamp.
+This exercise splits the Log Output application into two separate containers running inside a single Kubernetes Pod.
 
-## First Deployment
+The containers communicate through a shared volume.
 
-This project demonstrates deploying a containerized Python application using Docker and Kubernetes (k3d).
+## Application Architecture
 
-## Requirements
+### 1. Log Generator
 
-- Python 3
-- Docker
-- Kubernetes
-- k3d
+- Generates a random UUID when the container starts.
+- Generates a UTC timestamp every 5 seconds.
+- Writes the timestamp and UUID to `/app/files/log.txt`.
+- Appends new entries to the file.
 
-## Run Locally
+### 2. Log Reader
 
-```bash
-python3 app.py
+- Runs a Flask HTTP server on port 3000.
+- Reads the contents of `/app/files/log.txt`.
+- Returns the file contents when the user accesses the `/` endpoint.
+
+## Shared Volume
+
+Both containers use a Kubernetes `emptyDir` volume named `log-file`.
+
+The volume is mounted at:
+
+```text
+/app/files
 ```
 
-## Build Docker Image
+This allows the Log Generator to write the log file and the Log Reader to access the same file.
+
+## Docker
+
+Build the Docker image:
 
 ```bash
-docker build -t hashgenerator:1.0 .
+docker build -t log-output:2.0 .
 ```
 
-## Run Docker Container
+Import the image into k3d:
 
 ```bash
-docker run --name hashgenerator hashgenerator:1.0
+k3d image import log-output:2.0 -c k3s-default
 ```
 
-## Import Image into k3d
+## Kubernetes Deployment
+
+The Deployment `log-output-dep` contains:
+
+- `log-generator` container
+- `log-reader` container
+- Shared `emptyDir` volume
+
+Apply the Deployment:
 
 ```bash
-k3d image import hashgenerator:1.0 -c k3s-default
+kubectl apply -f manifests/deployment.yaml
 ```
 
-## Check Kubernetes Pods
+## Verify the Application
+
+Check the Pods:
 
 ```bash
 kubectl get pods
 ```
 
-## View Application Logs
+View Log Generator output:
 
 ```bash
-kubectl logs -f <pod-name>
+kubectl logs &lt;pod-name&gt; -c log-generator
 ```
-<<<<<<< HEAD
-# Hash Generator
 
-A simple Python application that generates a random UUID
-on startup and prints it every 5 seconds with a UTC timestamp.
-
-## Requirements
-
-- Python 3
-- Docker
-
-## Run locally
+View Log Reader output:
 
 ```bash
-python3 app.py
-=======
-# 1.1.-Getting-started
-First deployment
+kubectl logs &lt;pod-name&gt; -c log-reader
+```
+
+## Access the Application
+
+The existing Kubernetes Service and Ingress expose the Log Reader.
+
+Open:
+
+```text
+http://localhost:8081/
+```
+
+The browser displays the timestamped UUID entries stored in the shared log file.
+
+## Technologies Used
+
+- Python
+- Flask
+- Docker
+- Kubernetes
+- k3d
 >>>>>>> d7a1cde31979626c49924f6201f0d3e3a1d4cd19
