@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: log-generator
-          image: log-output:2.0
+          image: log-output:3.0
           imagePullPolicy: IfNotPresent
           command: ["python", "log_generator.py"]
           volumeMounts:
@@ -33,5 +33,6 @@ spec:
 
       volumes:
         - name: log-file
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: shared-data-claim
 
