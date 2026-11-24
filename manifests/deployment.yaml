@@ -13,9 +13,25 @@ spec:
         app: log-output
     spec:
       containers:
-        - name: log-output
-          image: log-output:1.0
+        - name: log-generator
+          image: log-output:2.0
           imagePullPolicy: IfNotPresent
+          command: ["python", "log_generator.py"]
+          volumeMounts:
+            - name: log-file
+              mountPath: /app/files
+
+        - name: log-reader
+          image: log-output:2.0
+          imagePullPolicy: IfNotPresent
+          command: ["python", "log_reader.py"]
           ports:
             - containerPort: 3000
+          volumeMounts:
+            - name: log-file
+              mountPath: /app/files
+
+      volumes:
+        - name: log-file
+          emptyDir: {}
 

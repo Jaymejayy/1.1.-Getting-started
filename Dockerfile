@@ -6,8 +6,7 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py .
+COPY log_generator.py .
+COPY log_reader.py .
 
 EXPOSE 3000
-
-CMD ["python", "app.py"]
