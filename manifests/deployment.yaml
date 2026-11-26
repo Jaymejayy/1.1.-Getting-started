@@ -14,5 +14,13 @@ spec:
     spec:
       containers:
         - name: todo-app
-          image: todo-app:2.0
+          image: todo-app:3.0
           imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: image-cache
+              mountPath: /app/cache
+
+      volumes:
+        - name: image-cache
+          persistentVolumeClaim:
+            claimName: shared-data-claim

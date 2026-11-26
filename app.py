@@ -1,14 +1,48 @@
-
 import os
-from flask import Flask
+import time
+import urllib.request
+from flask import Flask, send_file
 
 app = Flask(__name__)
 
 PORT = int(os.environ.get("PORT", 3000))
 
+CACHE_DIR = "/app/cache"
+IMAGE_FILE = os.path.join(CACHE_DIR, "image.jpg")
+CACHE_DURATION = 600  # 10 minutes
+
+
 @app.route("/")
 def home():
-    return "Todo app is running!"
+    return """
+        <h1>Todo app is running!</h1>
+        <img src="/image" alt="Random picture" width="600">
+    """
+
+
+@app.route("/image")
+def get_image():
+    os.makedirs(CACHE_DIR, exist_ok=True)
+
+    if os.path.exists(IMAGE_FILE):
+        image_age = time.time() - os.path.getmtime(IMAGE_FILE)
+    else:
+        image_age = CACHE_DURATION + 1
+
+    if image_age >= CACHE_DURATION:
+        try:
+            with urllib.request.urlopen("https://picsum.photos/1200") as response:
+                with open(IMAGE_FILE + ".tmp", "wb") as file:
+                    file.write(response.read())
+
+            os.replace(IMAGE_FILE + ".tmp", IMAGE_FILE)
+
+        except Exception:
+            if not os.path.exists(IMAGE_FILE):
+                raise
+
+    return send_file(IMAGE_FILE, mimetype="image/jpeg")
+
 
 if __name__ == "__main__":
     print(f"Server started in port {PORT}", flush=True)
