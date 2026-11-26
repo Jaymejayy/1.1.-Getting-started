@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: log-output-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-output
+  template:
+    metadata:
+      labels:
+        app: log-output
+    spec:
+      containers:
+        - name: log-generator
+          image: log-output:3.0
+          imagePullPolicy: IfNotPresent
+          command: ["python", "log_generator.py"]
+          volumeMounts:
+            - name: log-file
+              mountPath: /app/files
+
+        - name: log-reader
+          image: log-output:4.0
+          imagePullPolicy: IfNotPresent
+          command: ["python", "log_reader.py"]
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: log-file
+              mountPath: /app/files
+
+      volumes:
+        - name: log-file
+          persistentVolumeClaim:
+            claimName: shared-data-claim
+
