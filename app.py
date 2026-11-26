@@ -1,3 +1,4 @@
+
 import os
 import time
 import urllib.request
@@ -9,13 +10,41 @@ PORT = int(os.environ.get("PORT", 3000))
 
 CACHE_DIR = "/app/cache"
 IMAGE_FILE = os.path.join(CACHE_DIR, "image.jpg")
-CACHE_DURATION = 600  # 10 minutes
+CACHE_DURATION = 600
+
+todos = [
+    "Learn Kubernetes",
+    "Complete the DevOps course",
+    "Build a Todo application"
+]
 
 
 @app.route("/")
 def home():
-    return """
-        <h1>Todo app is running!</h1>
+    todo_list = ""
+
+    for todo in todos:
+        todo_list += f"<li>{todo}</li>"
+
+    return f"""
+        <h1>Todo App</h1>
+
+        <form>
+            <input
+                type="text"
+                name="todo"
+                maxlength="140"
+                placeholder="Enter a todo..."
+            >
+            <button type="button">Send</button>
+        </form>
+
+        <h2>Todo list</h2>
+        <ul>
+            {todo_list}
+        </ul>
+
+        <h2>Random picture</h2>
         <img src="/image" alt="Random picture" width="600">
     """
 
@@ -47,3 +76,4 @@ def get_image():
 if __name__ == "__main__":
     print(f"Server started in port {PORT}", flush=True)
     app.run(host="0.0.0.0", port=PORT)
+
